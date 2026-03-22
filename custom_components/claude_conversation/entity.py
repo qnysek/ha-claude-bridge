@@ -8,20 +8,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_KEY, MATCH_ALL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import intent
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from .const import DOMAIN, CONF_MODEL, CONF_MAX_TOKENS, CONF_SYSTEM_PROMPT
+from .const import CONF_MODEL, CONF_MAX_TOKENS, CONF_SYSTEM_PROMPT
 from .const import DEFAULT_MODEL, DEFAULT_MAX_TOKENS, DEFAULT_SYSTEM_PROMPT
 
 _LOGGER = logging.getLogger(__name__)
-
-
-async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    agent = ClaudeConversationEntity(hass, entry)
-    async_add_entities([agent])
 
 
 class ClaudeConversationEntity(conversation.ConversationEntity):
