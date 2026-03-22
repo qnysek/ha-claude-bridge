@@ -1,0 +1,27 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Claude Conversation Agent",
+        "description": "Wpisz klucz API Anthropic z https://console.anthropic.com/",
+        "data": { "api_key": "Klucz API Anthropic" }
+      }
+    },
+    "error": {
+      "invalid_auth": "Nieprawidłowy klucz API",
+      "cannot_connect": "Nie można połączyć się z API"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Ustawienia Claude",
+        "data": {
+          "model": "Model",
+          "max_tokens": "Maks. tokenów",
+          "system_prompt": "System prompt"
+        }
+      }
+    }
+  }
+}
