@@ -1,0 +1,10 @@
+{
+  "domain": "claude_conversation",
+  "name": "Claude Conversation Agent",
+  "version": "1.0.0",
+  "documentation": "https://github.com/qnysek/ha-claude-bridge",
+  "requirements": ["anthropic>=0.40.0"],
+  "dependencies": [],
+  "codeowners": ["@qnysek"],
+  "iot_class": "cloud_polling"
+}
