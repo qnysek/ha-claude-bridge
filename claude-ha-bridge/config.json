@@ -1,0 +1,31 @@
+{
+  "name": "Claude HA Bridge",
+  "description": "Claude AI REST API bridge for Home Assistant",
+  "version": "1.0.0",
+  "slug": "claude_ha_bridge",
+  "init": false,
+  "arch": ["aarch64", "amd64", "armhf", "armv7", "i386"],
+  "startup": "services",
+  "boot": "auto",
+  "ports": {
+    "8765/tcp": 8765
+  },
+  "ports_description": {
+    "8765/tcp": "Claude HA Bridge API"
+  },
+  "options": {
+    "anthropic_api_key": "",
+    "ha_bridge_token": "change-me",
+    "claude_model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "system_prompt": "You are a smart home assistant integrated with Home Assistant. Be concise. Answer in the same language as the user."
+  },
+  "schema": {
+    "anthropic_api_key": "str",
+    "ha_bridge_token": "str",
+    "claude_model": "str",
+    "max_tokens": "int",
+    "system_prompt": "str"
+  },
+  "url": "https://github.com/plubnicki/ha-claude-bridge"
+}
