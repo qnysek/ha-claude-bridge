@@ -1,7 +1,7 @@
 {
   "name": "Claude HA Bridge",
   "description": "Claude AI REST API bridge for Home Assistant",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "slug": "claude_ha_bridge",
   "init": false,
   "arch": ["aarch64", "amd64", "armhf", "armv7", "i386"],
@@ -18,7 +18,7 @@
     "ha_bridge_token": "change-me",
     "claude_model": "claude-sonnet-4-20250514",
     "max_tokens": 1024,
-    "system_prompt": "You are a smart home assistant integrated with Home Assistant. Be concise. Answer in the same language as the user."
+    "system_prompt": "You are a smart home assistant. Be concise. Answer in the same language as the user."
   },
   "schema": {
     "anthropic_api_key": "str",
@@ -27,5 +27,11 @@
     "max_tokens": "int",
     "system_prompt": "str"
   },
-  "url": "https://github.com/plubnicki/ha-claude-bridge"
+  "build_from": {
+    "aarch64": "ghcr.io/home-assistant/aarch64-base-python:3.12-alpine3.19",
+    "amd64": "ghcr.io/home-assistant/amd64-base-python:3.12-alpine3.19",
+    "armhf": "ghcr.io/home-assistant/armhf-base-python:3.12-alpine3.19",
+    "armv7": "ghcr.io/home-assistant/armv7-base-python:3.12-alpine3.19",
+    "i386": "ghcr.io/home-assistant/i386-base-python:3.12-alpine3.19"
+  }
 }
