@@ -1,4 +1,5 @@
-FROM python:3.12-alpine
+ARG BUILD_FROM
+FROM $BUILD_FROM
 
 RUN pip install --no-cache-dir fastapi uvicorn anthropic python-dotenv pydantic
 
