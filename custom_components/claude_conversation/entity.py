@@ -189,7 +189,14 @@ class ClaudeConversationEntity(ConversationEntity):
                 ) as resp:
                     data = await resp.json()
                     if resp.status != 200:
-                        return f"Błąd API {resp.status}: {data}"
+                        err_msg = f"Błąd API {resp.status}: {data}"
+                        _LOGGER.error(err_msg)
+                        # Clean broken history - remove last assistant msg if it has tool_use without results
+                        if self._history[conv_id] and self._history[conv_id][-1].get("role") == "assistant":
+                            last = self._history[conv_id][-1].get("content", [])
+                            if any(b.get("type") == "tool_use" for b in (last if isinstance(last, list) else [])):
+                                self._history[conv_id].pop()
+                        return err_msg
             except Exception as err:
                 _LOGGER.error("Claude API error: %s", err)
                 return f"Błąd połączenia: {err}"
