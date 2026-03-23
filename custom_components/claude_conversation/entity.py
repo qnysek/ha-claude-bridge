@@ -2,17 +2,38 @@
 from __future__ import annotations
 import logging
 from typing import Literal
+
 import anthropic
-from homeassistant.components.conversation import ConversationEntity
-from homeassistant.components.conversation.models import ConversationInput, ConversationResult
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_KEY, MATCH_ALL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import intent
+
 from .const import CONF_MODEL, CONF_MAX_TOKENS, CONF_SYSTEM_PROMPT
 from .const import DEFAULT_MODEL, DEFAULT_MAX_TOKENS, DEFAULT_SYSTEM_PROMPT
 
 _LOGGER = logging.getLogger(__name__)
+
+# Handle import variations across HA versions
+try:
+    from homeassistant.components.conversation import (
+        ConversationEntity,
+        ConversationInput,
+        ConversationResult,
+    )
+except ImportError:
+    try:
+        from homeassistant.components.conversation import ConversationEntity
+        from homeassistant.components.conversation.models import (
+            ConversationInput,
+            ConversationResult,
+        )
+    except ImportError:
+        from homeassistant.components import conversation as _conv
+        ConversationEntity = _conv.ConversationEntity
+        ConversationInput = _conv.ConversationInput
+        ConversationResult = _conv.ConversationResult
 
 
 class ClaudeConversationEntity(ConversationEntity):
@@ -42,10 +63,7 @@ class ClaudeConversationEntity(ConversationEntity):
         user_content = user_input.text
         states = self._get_states_summary()
         if states:
-            user_content += f"
-
-[Stan urządzeń]
-{states}"
+            user_content += f"\n\n[Stan urządzeń]\n{states}"
 
         self._history[conv_id].append({"role": "user", "content": user_content})
         if len(self._history[conv_id]) > 40:
@@ -59,9 +77,9 @@ class ClaudeConversationEntity(ConversationEntity):
                 messages=self._history[conv_id],
             )
             reply = response.content[0].text
-        except anthropic.APIError as err:
+        except Exception as err:
             _LOGGER.error("Claude API error: %s", err)
-            reply = f"Błąd API: {err}"
+            reply = f"Błąd: {err}"
 
         self._history[conv_id].append({"role": "assistant", "content": reply})
 
@@ -80,5 +98,4 @@ class ClaudeConversationEntity(ConversationEntity):
             lines.append(f"{name}: {state.state}")
             if len(lines) >= 80:
                 break
-        return "
-".join(lines)
+        return "\n".join(lines)
