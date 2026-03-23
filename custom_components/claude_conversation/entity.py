@@ -33,6 +33,7 @@ ALLOWED_FILES = (
     "input_number.yaml", "input_text.yaml", "input_select.yaml",
     "input_datetime.yaml", "configuration.yaml", "lovelace.yaml",
 )
+ALLOWED_PREFIXES = ("www/", "lovelace/")
 
 TOOLS = [
     {
@@ -253,10 +254,16 @@ class ClaudeConversationEntity(ConversationEntity):
                 return content[:8000]
 
             elif tool_name == "write_file":
-                filename = os.path.basename(inp["filename"])
-                if filename not in ALLOWED_FILES:
-                    return f"Niedozwolony plik. Dozwolone: {ALLOWED_FILES}"
+                filename = inp["filename"].lstrip("/")
+                # Allow www/ and lovelace/ subdirs, or top-level config files
+                allowed = (
+                    any(filename.startswith(p) for p in ALLOWED_PREFIXES)
+                    or os.path.basename(filename) in ALLOWED_FILES
+                )
+                if not allowed:
+                    return f"Niedozwolony plik: {filename}"
                 path = os.path.join(CONFIG_DIR, filename)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
                 with open(path, "w") as f:
                     f.write(inp["content"])
                 return f"Zapisano: {path} ({len(inp['content'])} znaków)"
