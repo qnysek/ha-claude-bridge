@@ -1,39 +1,31 @@
-"""Claude Conversation Agent for Home Assistant."""
+"""Claude Conversation Agent - uses aiohttp instead of anthropic SDK."""
 from __future__ import annotations
+import json
 import logging
 from typing import Literal
-
-import anthropic
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_API_KEY, MATCH_ALL
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import intent
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import CONF_MODEL, CONF_MAX_TOKENS, CONF_SYSTEM_PROMPT
 from .const import DEFAULT_MODEL, DEFAULT_MAX_TOKENS, DEFAULT_SYSTEM_PROMPT
 
 _LOGGER = logging.getLogger(__name__)
 
-# Handle import variations across HA versions
 try:
     from homeassistant.components.conversation import (
-        ConversationEntity,
-        ConversationInput,
-        ConversationResult,
+        ConversationEntity, ConversationInput, ConversationResult,
     )
 except ImportError:
-    try:
-        from homeassistant.components.conversation import ConversationEntity
-        from homeassistant.components.conversation.models import (
-            ConversationInput,
-            ConversationResult,
-        )
-    except ImportError:
-        from homeassistant.components import conversation as _conv
-        ConversationEntity = _conv.ConversationEntity
-        ConversationInput = _conv.ConversationInput
-        ConversationResult = _conv.ConversationResult
+    from homeassistant.components.conversation import ConversationEntity
+    from homeassistant.components.conversation.models import (
+        ConversationInput, ConversationResult,
+    )
+
+ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 
 
 class ClaudeConversationEntity(ConversationEntity):
@@ -45,13 +37,13 @@ class ClaudeConversationEntity(ConversationEntity):
         self.entry = entry
         self._attr_unique_id = entry.entry_id
         self._history: dict[str, list] = {}
-        self._client = anthropic.AsyncAnthropic(api_key=entry.data[CONF_API_KEY])
 
     @property
     def supported_languages(self) -> list[str] | Literal["*"]:
         return MATCH_ALL
 
     async def async_process(self, user_input: ConversationInput) -> ConversationResult:
+        api_key = self.entry.data[CONF_API_KEY]
         model = self.entry.options.get(CONF_MODEL, DEFAULT_MODEL)
         max_tokens = int(self.entry.options.get(CONF_MAX_TOKENS, DEFAULT_MAX_TOKENS))
         system_prompt = self.entry.options.get(CONF_SYSTEM_PROMPT, DEFAULT_SYSTEM_PROMPT)
@@ -70,13 +62,25 @@ class ClaudeConversationEntity(ConversationEntity):
             self._history[conv_id] = self._history[conv_id][-40:]
 
         try:
-            response = await self._client.messages.create(
-                model=model,
-                max_tokens=max_tokens,
-                system=system_prompt,
-                messages=self._history[conv_id],
-            )
-            reply = response.content[0].text
+            session = async_get_clientsession(self.hass)
+            async with session.post(
+                ANTHROPIC_API_URL,
+                headers={
+                    "x-api-key": api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type": "application/json",
+                },
+                json={
+                    "model": model,
+                    "max_tokens": max_tokens,
+                    "system": system_prompt,
+                    "messages": self._history[conv_id],
+                },
+            ) as resp:
+                data = await resp.json()
+                if resp.status != 200:
+                    raise Exception(f"API {resp.status}: {data}")
+                reply = data["content"][0]["text"]
         except Exception as err:
             _LOGGER.error("Claude API error: %s", err)
             reply = f"Błąd: {err}"
