@@ -170,6 +170,14 @@ class ClaudeConversationEntity(ConversationEntity):
     async def _run_with_tools(self, api_key, model, max_tokens, system_prompt, conv_id) -> str:
         session = async_get_clientsession(self.hass)
         for _ in range(10):
+            # Sanitize: remove orphaned tool_use blocks at end of history
+            hist = self._history[conv_id]
+            while hist and hist[-1].get("role") == "assistant":
+                last_content = hist[-1].get("content", [])
+                if isinstance(last_content, list) and any(b.get("type") == "tool_use" for b in last_content):
+                    hist.pop()
+                else:
+                    break
             try:
                 async with session.post(
                     ANTHROPIC_API_URL,
