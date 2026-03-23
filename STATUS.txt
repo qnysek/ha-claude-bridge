@@ -1,0 +1,85 @@
+# HA-CLAUDE-BRIDGE - STATUS PROJEKTU
+Data: 2026-03-23
+
+## CEL
+Claude jako natywny agent w HA Assist (czat + glos):
+- odpowiada na pytania o stan urzadzen
+- tworzy/edytuje automatyzacje
+- steruje urzadzeniami
+- konfiguruje integracje
+
+## DANE DOSTEPOWE
+HA URL:        https://ysu5xf10lj3wxbuerm5g4x9okibk6aqp.ui.nabu.casa
+HA Token:      [HA_TOKEN - przechowywany lokalnie, nie w repo]
+GitHub repo:   https://github.com/qnysek/ha-claude-bridge
+GitHub token:  [GITHUB_TOKEN - przechowywany lokalnie]
+Anthropic key: [ANTHROPIC_KEY - przechowywany lokalnie]
+VS Code:       http://homeassistant.local:8123/app/a0d7b954_vscode
+HA wersja:     2026.3.1 (Polska, Zambrow)
+
+## URZADZENIA
+- 17 swiatel Tuya WiFi         UNAVAILABLE (LocalTuya, zla siec WiFi, do naprawy osobno)
+- 13 termostatow TRV Zigbee    dzialaja
+- Zigbee2MQTT bridge
+- iPhone Pawel (mobile_app)
+- Node-RED, MQTT, MariaDB
+
+## CO ZOSTALO ZROBIONE
+
+[1] Custom component zainstalowany w HA
+    Sciezka: /config/custom_components/claude_conversation/
+    Pliki:   __init__.py, manifest.json, config_flow.py, const.py, conversation.py, entity.py
+    Config entry state: "loaded" (integracja widoczna w HA UI)
+
+[2] GitHub repo zawiera kompletny komponent
+    custom_components/claude_conversation/ - wszystkie pliki aktualne
+
+[3] Naprawiony bug (2026-03-23)
+    PROBLEM:   "Platform claude_conversation.conversation not found"
+    PRZYCZYNA: HA 2025+ zmienil API ConversationEntity:
+               - import z homeassistant.components.conversation (nie .ConversationEntity)
+               - ConversationInput, ConversationResult z .models
+               - supported_languages jako @property, nie _attr_supported_languages
+    NAPRAWA:   entity.py zaktualizowany na GitHubie
+               commit: "fix: use ConversationEntity from models for HA 2025+"
+               ALE: plik na HA (fizycznie) jeszcze nie zaktualizowany - wymaga wget + restart
+
+[4] Co robi entity.py
+    - Laczy sie z Anthropic API (claude-sonnet-4-20250514)
+    - Przy kazdym pytaniu daje Claude stan urzadzen (do 80 encji, bez unavailable)
+    - Pamiec historii rozmow per conversation_id (ostatnie 40 wiadomosci)
+    - Obsluguje wszystkie jezyki (MATCH_ALL)
+
+## CO ZOSTALO DO ZROBIENIA
+
+[KROK 1 - WYMAGANY] Zaktualizowac entity.py na HA:
+    Otworz VS Code Server lub terminal SSH i wykonaj:
+      cd /config/custom_components/claude_conversation
+      wget -O entity.py https://raw.githubusercontent.com/qnysek/ha-claude-bridge/main/custom_components/claude_conversation/entity.py
+    Potem restart: Ustawienia -> System -> Uruchom ponownie
+
+[KROK 2] Ustawic Claude jako agenta Assist:
+    Sprawdzic czy pojawila sie encja conversation.claude_*
+    Ustawienia -> Glos -> Asystenci -> zmien agenta na Claude
+
+[KROK 3] Weryfikacja:
+    Przetestowac przez Assist (mikrofon lub czat)
+    Przykladowe pytania: "jakie mam termostaty?" / "ile wynosi temperatura w salonie?"
+
+[KROK 4 - Rozszerzenia planowane]
+    - Tool use dla Claude: wywolywanie uslug HA (light.turn_on, climate.set_temp itd.)
+      Aktualnie Claude CZYTA stany ale NIE STERUJE urzadzeniami bezposrednio
+      Do implementacji: function calling w entity.py z wywolaniem hass.services.async_call()
+    - Naprawa swiatel Tuya (osobny problem - konfiguracja sieci WiFi / LocalTuya)
+    - Dopracowanie system prompt PL pod konkretne urzadzenia w domu
+
+## ARCHITEKTURA (wybrana)
+Custom component jako ConversationEntity - natywna integracja z HA Assist
+NIE REST API bridge - bez dodatkowego serwera, wszystko w ramach HA
+
+## UWAGI DLA KOLEJNEJ SESJI CLAUDE
+- Uzywaj tylko wersji web (claude.ai), NIE Claude in Chrome
+- Krotko, zwiezle, bez powitan, fokus na wynikach
+- Dostep do HA przez REST API dziala (token wazny do 2036)
+- entity.py na GitHubie = poprawna wersja; na HA jeszcze stara (nienaprawiona)
+- Przed kazdym krokiem sprawdz ten plik - tutaj jest aktualny stan projektu
