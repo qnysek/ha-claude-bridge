@@ -1,0 +1,128 @@
+title: Parter
+path: parter
+icon: mdi:floor-plan
+cards:
+  - type: picture-elements
+    image: /local/floorplan_parter.svg
+    elements:
+
+      # === KOTŁOWNIA ===
+      - type: state-badge
+        entity: climate.piec_termostat
+        style:
+          top: 21%
+          left: 27%
+          transform: scale(0.85)
+        tap_action:
+          action: more-info
+
+      # === SYPIALNIA RODZICÓW ===
+      - type: state-badge
+        entity: climate.sypialnia_podloga
+        style:
+          top: 21%
+          left: 76%
+          transform: scale(0.85)
+        tap_action:
+          action: more-info
+      - type: state-label
+        entity: sensor.termostat_higrometr_sypialnia_temperature
+        style:
+          top: 32%
+          left: 76%
+          color: white
+          font-size: 11px
+          background: rgba(0,0,0,0.5)
+          padding: 2px 6px
+          border-radius: 4px
+
+      # === KUCHNIA ===
+      - type: state-badge
+        entity: climate.kuchnia_podloga
+        style:
+          top: 42%
+          left: 47%
+          transform: scale(0.8)
+        tap_action:
+          action: more-info
+
+      # === SALON ===
+      - type: state-badge
+        entity: climate.salon_podloga
+        style:
+          top: 73%
+          left: 27%
+          transform: scale(0.85)
+        tap_action:
+          action: more-info
+      - type: state-label
+        entity: sensor.termostat_higrometr_salon_temperature
+        style:
+          top: 84%
+          left: 27%
+          color: white
+          font-size: 11px
+          background: rgba(0,0,0,0.5)
+          padding: 2px 6px
+          border-radius: 4px
+
+      # === WIATROŁAP ===
+      - type: state-badge
+        entity: climate.wiatrolap_termostat
+        style:
+          top: 73%
+          left: 47%
+          transform: scale(0.8)
+        tap_action:
+          action: more-info
+
+      # === SYPIALNIA MALWINA ===
+      - type: state-badge
+        entity: climate.malwina_podloga
+        style:
+          top: 57%
+          left: 86%
+          transform: scale(0.85)
+        tap_action:
+          action: more-info
+      - type: state-label
+        entity: sensor.termostat_higrometr_malwina_temperature
+        style:
+          top: 67%
+          left: 86%
+          color: white
+          font-size: 11px
+          background: rgba(0,0,0,0.5)
+          padding: 2px 6px
+          border-radius: 4px
+
+      # === SYPIALNIA LAURA ===
+      - type: state-badge
+        entity: climate.laura_termostat
+        style:
+          top: 84%
+          left: 86%
+          transform: scale(0.85)
+        tap_action:
+          action: more-info
+      - type: state-label
+        entity: sensor.termostat_higrometr_laura_temperature
+        style:
+          top: 93%
+          left: 86%
+          color: white
+          font-size: 11px
+          background: rgba(0,0,0,0.5)
+          padding: 2px 6px
+          border-radius: 4px
+
+      # === IKONA DOMU ===
+      - type: state-icon
+        entity: climate.piec_termostat
+        icon: mdi:home-thermometer
+        style:
+          top: 5%
+          left: 5%
+          color: "#4a9eff"
+          transform: scale(1.2)
+
